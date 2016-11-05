@@ -1,0 +1,272 @@
+ 
+Orginalprogramm mit verschiedenen Optimierungsgraden:
+
+time ./partdiff-seq 1 2 128 1 2 1024
+
+
+Anfangszustand:
+
+Berechnungszeit:    30.601895 s 
+Berechnungsmethode: Jacobi
+Interlines:         128
+Stoerfunktion:      f(x,y)=0
+Terminierung:       Anzahl der Iterationen
+Anzahl Iterationen: 1024
+Norm des Fehlers:   3.394481e-04
+Matrix:
+ 1.0000 0.8750 0.7500 0.6250 0.5000 0.3750 0.2500 0.1250 0.0000
+ 0.8750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.1250
+ 0.7500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.2500
+ 0.6250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.3750
+ 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.5000
+ 0.3750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.6250
+ 0.2500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.7500
+ 0.1250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.8750
+ 0.0000 0.1250 0.2500 0.3750 0.5000 0.6250 0.7500 0.8750 1.0000
+
+real	0m30.623s
+user	0m30.624s
+sys	0m0.000s
+
+
+(-1):
+
+Berechnungszeit:    7.821499 s 
+Berechnungsmethode: Jacobi
+Interlines:         128
+Stoerfunktion:      f(x,y)=0
+Terminierung:       Anzahl der Iterationen
+Anzahl Iterationen: 1024
+Norm des Fehlers:   3.394481e-04
+Matrix:
+ 1.0000 0.8750 0.7500 0.6250 0.5000 0.3750 0.2500 0.1250 0.0000
+ 0.8750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.1250
+ 0.7500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.2500
+ 0.6250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.3750
+ 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.5000
+ 0.3750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.6250
+ 0.2500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.7500
+ 0.1250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.8750
+ 0.0000 0.1250 0.2500 0.3750 0.5000 0.6250 0.7500 0.8750 1.0000
+
+real	0m7.827s
+user	0m7.824s
+sys	0m0.000s
+
+
+(-02):
+
+Berechnungszeit:    7.937098 s 
+Berechnungsmethode: Jacobi
+Interlines:         128
+Stoerfunktion:      f(x,y)=0
+Terminierung:       Anzahl der Iterationen
+Anzahl Iterationen: 1024
+Norm des Fehlers:   3.394481e-04
+Matrix:
+ 1.0000 0.8750 0.7500 0.6250 0.5000 0.3750 0.2500 0.1250 0.0000
+ 0.8750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.1250
+ 0.7500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.2500
+ 0.6250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.3750
+ 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.5000
+ 0.3750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.6250
+ 0.2500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.7500
+ 0.1250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.8750
+ 0.0000 0.1250 0.2500 0.3750 0.5000 0.6250 0.7500 0.8750 1.0000
+
+real	0m7.949s
+user	0m7.944s
+sys	0m0.000s
+
+
+(-03):
+
+Berechnungszeit:    5.493647 s 
+Berechnungsmethode: Jacobi
+Interlines:         128
+Stoerfunktion:      f(x,y)=0
+Terminierung:       Anzahl der Iterationen
+Anzahl Iterationen: 1024
+Norm des Fehlers:   3.394481e-04
+Matrix:
+ 1.0000 0.8750 0.7500 0.6250 0.5000 0.3750 0.2500 0.1250 0.0000
+ 0.8750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.1250
+ 0.7500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.2500
+ 0.6250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.3750
+ 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.5000
+ 0.3750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.6250
+ 0.2500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.7500
+ 0.1250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.8750
+ 0.0000 0.1250 0.2500 0.3750 0.5000 0.6250 0.7500 0.8750 1.0000
+
+real	0m5.499s
+user	0m5.492s
+sys	0m0.004s
+
+
+
+Optimierungen:
+
+1. Zeile 228 bis 231
+
+In den for-Schleifen i mit j austauschen, damit in der jeder Spalte das Array mit der Zeile nicht neu geladen werden muss. Sondern das Zeilen Array weiterverwendet werden kann.
+
+real	0m20.859s
+user	0m20.848s
+sys	0m0.004s
+
+
+2. Zeile 225
+
+getResiduum in calculate integriert, weil sie ziemlich oft aufgerufen wird.
+
+real	0m17.619s
+user	0m17.616s
+sys	0m0.000s
+
+me@Kiste:~/Downloads/03-PDE/pde$ gprof ./partdiff-seq
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 91.66     29.36    29.36        1    29.36    31.92  calculate
+  8.00     31.92     2.56 1088472064     0.00     0.00  getResiduum  <--- viel zu viele function-calls
+  0.47     32.07     0.15        1     0.15     0.15  initMatrices
+  0.00     32.07     0.00        4     0.00     0.00  allocateMemory
+  0.00     32.07     0.00        1     0.00     0.00  AskParams
+  0.00     32.07     0.00        1     0.00     0.00  DisplayMatrix
+  0.00     32.07     0.00        1     0.00     0.00  allocateMatrices
+  0.00     32.07     0.00        1     0.00     0.00  displayStatistics
+  0.00     32.07     0.00        1     0.00     0.00  freeMatrices
+  0.00     32.07     0.00        1     0.00     0.00  initVariables
+
+
+3. Zuweisung korrektur = residuum unnoetig
+
+real	0m15.420s
+user	0m15.416s
+sys	0m0.000s
+
+4. Reihenfolge der Rechenoperationen fuer den Abtaststern optimieren
+mit den Aenderungen an den zwei Schleifen fuehrt die gewaehlte Reihenfolge aufgrund der row-major Array-Struktur in C++ zu weniger Cache-Misses
+
+5. Matrizen auf 2 Dimensionen beschränken, damit die Daten näher im Speicher zusammenliegen
+
+(6.) h als lokale Variable in Zeile 192, da diese sich nicht dynamisch aendert macht es keinen Sinn hier einen Pointer zu benutzen
+
+
+Nach der Optimierung mit (-O3).
+
+Berechnungszeit:    1.252311 s 
+Berechnungsmethode: Jacobi
+Interlines:         128
+Stoerfunktion:      f(x,y)=0
+Terminierung:       Anzahl der Iterationen
+Anzahl Iterationen: 1024
+Norm des Fehlers:   0.000000e+00
+Matrix:
+ 1.0000 0.8750 0.7500 0.6250 0.5000 0.3750 0.2500 0.1250 0.0000
+ 0.8750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.1250
+ 0.7500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.2500
+ 0.6250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.3750
+ 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.5000
+ 0.3750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.6250
+ 0.2500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.7500
+ 0.1250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.8750
+ 0.0000 0.1250 0.2500 0.3750 0.5000 0.6250 0.7500 0.8750 1.0000
+
+real	0m1.256s
+user	0m1.252s
+sys	0m0.000s
+
+
+Finale Version auf AMD CPU:
+me@Kiste:~/HLR_Uebungen/03-PDE/pde$ perf stat ./partdiff-seq 1 2 128 1 2 1024
+
+============================================================
+Program for calculation of partial differential equations.  
+============================================================
+(c) Dr. Thomas Ludwig, TU München.
+    Thomas A. Zochler, TU München.
+    Andreas C. Schmidt, TU München.
+============================================================
+Berechnungszeit:    4.919222 s 
+Berechnungsmethode: Jacobi
+Interlines:         128
+Stoerfunktion:      f(x,y)=0
+Terminierung:       Anzahl der Iterationen
+Anzahl Iterationen: 1024
+Norm des Fehlers:   3.394481e-04
+Matrix:
+ 1.0000 0.8750 0.7500 0.6250 0.5000 0.3750 0.2500 0.1250 0.0000
+ 0.8750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.1250
+ 0.7500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.2500
+ 0.6250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.3750
+ 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.5000
+ 0.3750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.6250
+ 0.2500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.7500
+ 0.1250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.8750
+ 0.0000 0.1250 0.2500 0.3750 0.5000 0.6250 0.7500 0.8750 1.0000
+
+ Performance counter stats for './partdiff-seq 1 2 128 1 2 1024':
+
+       4922,244517      task-clock (msec)         #    0,999 CPUs utilized          
+               412      context-switches          #    0,084 K/sec                  
+                 1      cpu-migrations            #    0,000 K/sec                  
+               146      page-faults               #    0,030 K/sec                  
+    31.578.532.412      cycles                    #    6,415 GHz                      (50,20%)
+       143.410.338      stalled-cycles-frontend   #    0,45% frontend cycles idle   
+     5.917.156.509      stalled-cycles-backend    #   18,74% backend cycles idle      (49,96%)
+    26.138.854.839      instructions              #    0,83  insn per cycle         
+                                                  #    0,23  stalled cycles per insn  (49,96%)
+     2.911.821.885      branches                  #  591,564 M/sec                    (99,65%)
+           928.940      branch-misses             #    0,03% of all branches        
+
+       4,927040119 seconds time elapsed
+       
+Gegen Ursprungsversion auf gleicher CPU:
+me@Kiste:~/Downloads/03-PDE/pde$ perf stat ./partdiff-seq 1 2 128 1 2 1024
+
+============================================================
+Program for calculation of partial differential equations.  
+============================================================
+(c) Dr. Thomas Ludwig, TU München.
+    Thomas A. Zochler, TU München.
+    Andreas C. Schmidt, TU München.
+============================================================
+Berechnungszeit:    58.625466 s 
+Berechnungsmethode: Jacobi
+Interlines:         128
+Stoerfunktion:      f(x,y)=0
+Terminierung:       Anzahl der Iterationen
+Anzahl Iterationen: 1024
+Norm des Fehlers:   3.394481e-04
+Matrix:
+ 1.0000 0.8750 0.7500 0.6250 0.5000 0.3750 0.2500 0.1250 0.0000
+ 0.8750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.1250
+ 0.7500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.2500
+ 0.6250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.3750
+ 0.5000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.5000
+ 0.3750 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.6250
+ 0.2500 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.7500
+ 0.1250 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.8750
+ 0.0000 0.1250 0.2500 0.3750 0.5000 0.6250 0.7500 0.8750 1.0000
+
+ Performance counter stats for './partdiff-seq 1 2 128 1 2 1024':
+
+      58612,482081      task-clock (msec)         #    0,999 CPUs utilized          
+             5.019      context-switches          #    0,086 K/sec                  
+                 0      cpu-migrations            #    0,000 K/sec                  
+               661      page-faults               #    0,011 K/sec                  
+   194.151.266.714      cycles                    #    3,312 GHz                      (99,89%)
+     1.195.069.740      stalled-cycles-frontend   #    0,62% frontend cycles idle     (50,33%)
+    99.288.474.851      stalled-cycles-backend    #   51,14% backend cycles idle      (49,79%)
+   245.636.447.450      instructions              #    1,27  insn per cycle         
+                                                  #    0,40  stalled cycles per insn  (49,89%)
+    27.408.952.198      branches                  #  467,630 M/sec                    (50,37%)
+        12.531.638      branch-misses             #    0,05% of all branches          (99,75%)
+
+      58,647142335 seconds time elapsed
+
+Leicht erkennbare verringerung von Branches und Page-Faults
