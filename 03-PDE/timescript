@@ -1,0 +1,12 @@
+#! /bin/bash
+
+
+#timestamp function
+timestamp() {
+date +"%x %T:%N"
+}
+
+TIMESTAMP="$(timestamp)"
+HOSTNAME="$(hostname)"
+
+echo ${HOSTNAME}: ${TIMESTAMP}
