@@ -64,6 +64,7 @@ west         up    6:00:00     10   idle west[1-10]
 2.4.1:
 Die Reihenfolge der Ausgaben sollte zufällig sein. Hier ist aber zunächst die Ausgabe von west1 da, danach die anderen 3.
 Dann kommt häufig wieder 3 mal west1 und der Rest ziemlich zufällig.
+Dabei ist mit west1 der erste Knoten (numerisch sortiert) gemeint. In späteren Ausführungen ist das z.B. west5.
 Die Timestamps sind nicht sortiert. Also scheint SLURM die Ergebnisse der einzelnen Prozesse mit einem bestimmten Schema einzusammeln.
 Es scheint nicht so zu sein, dass die Ausgabedatei beschrieben wird, wenn ein Prozess fertig ist.
 
