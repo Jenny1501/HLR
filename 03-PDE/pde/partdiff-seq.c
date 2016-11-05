@@ -198,8 +198,7 @@ void calculate(struct calculation_arguments* arguments,
 		
 		while (options->term_iteration > 0) {
 		maxresiduum = 0;
-			
-		if (options->inf_func == FUNC_F0) {
+        
 			// over all columns
 			for (i = 1; i < N; i++) {
 				// over all rows
@@ -208,7 +207,11 @@ void calculate(struct calculation_arguments* arguments,
 							+ (4.0 * Matrix2[i][j]) - Matrix2[i][j - 1]
 							- Matrix2[i][j + 1];
 
-					residuum = (-star) / 4.0;
+					if (options->inf_func == FUNC_F0) {
+                        residuum = (-star) / 4.0;
+                    } else {
+                        residuum = (TWO_PI_SQUARE * sin((double) (j) * PI * h) * sin((double) (i) * PI * h) * h * h - star) / 4.0;
+                    }
 
 					Matrix2[i][j] = Matrix2[i][j] + residuum;
 
@@ -216,30 +219,6 @@ void calculate(struct calculation_arguments* arguments,
 					maxresiduum =	(residuum < maxresiduum) ? maxresiduum : residuum;
 				}
 			}
-		} else {
-			// over all columns
-			for (i = 1; i < N; i++) {
-				// over all rows
-				for (j = 1; j < N; j++) {
-					star = -Matrix2[i - 1][j] - Matrix2[i + 1][j]
-							+ (4.0 * Matrix2[i][j]) - Matrix2[i][j - 1]
-							- Matrix2[i][j + 1];
-
-					residuum = (double) (TWO_PI_SQUARE
-							* sin((double) j * PI * h)
-							* sin((double) i * PI * h) * h * h - star) / 4.0;
-
-					//korrektur = residuum;
-					Matrix2[i][j] = Matrix2[i][j] + residuum;
-
-					residuum = (residuum < 0) ? -residuum : residuum;
-					maxresiduum =
-					(residuum < maxresiduum) ? maxresiduum : residuum;
-
-					//Matrix[m1][i][j] = Matrix[m2][i][j] + korrektur;
-				}
-			}
-		}
 
 		results->stat_iteration++;
 		results->stat_precision = maxresiduum;
@@ -264,7 +243,6 @@ void calculate(struct calculation_arguments* arguments,
 		maxresiduum = 0;
 
 			
-		if (options->inf_func == FUNC_F0) {
 			// over all columns
 			for (i = 1; i < N; i++) {
 				// over all rows
@@ -274,7 +252,11 @@ void calculate(struct calculation_arguments* arguments,
 							- Matrix2[i][j + 1];
 
 					//residuum = getResiduum(arguments, options, i, j, star);
-					residuum = (-star) / 4.0;
+					if (options->inf_func == FUNC_F0) {
+                        residuum = (-star) / 4.0;
+                    } else {
+                        residuum = (TWO_PI_SQUARE * sin((double) (j) * PI * h) * sin((double) (i) * PI * h) * h * h - star) / 4.0;
+                    }
 
 					//korrektur = residuum;
 					Matrix1[i][j] = Matrix2[i][j] + residuum;
@@ -286,30 +268,6 @@ void calculate(struct calculation_arguments* arguments,
 					//Matrix[m1][i][j] = Matrix[m2][i][j] + korrektur;
 				}
 			}
-		} else {
-			// over all columns
-			for (i = 1; i < N; i++) {
-				// over all rows
-				for (j = 1; j < N; j++) {
-					star = -Matrix2[i - 1][j] - Matrix2[i + 1][j]
-							+ (4.0 * Matrix2[i][j]) - Matrix2[i][j - 1]
-							- Matrix2[i][j + 1];
-
-					residuum = (double) (TWO_PI_SQUARE
-							* sin((double) j * PI * h)
-							* sin((double) i * PI * h) * h * h - star) / 4.0;
-
-					//korrektur = residuum;
-					Matrix1[i][j] = Matrix2[i][j] + residuum;
-
-					residuum = (residuum < 0) ? -residuum : residuum;
-					maxresiduum =
-					(residuum < maxresiduum) ? maxresiduum : residuum;
-
-					//Matrix[m1][i][j] = Matrix2[i][j] + korrektur;
-				}
-			}
-		}
 
 		results->stat_iteration++;
 		results->stat_precision = maxresiduum;
