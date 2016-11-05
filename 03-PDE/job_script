@@ -1,0 +1,11 @@
+#! /bin/bash
+
+#SBATCH --job-name=weidmann123
+#SBATCH --partition=west
+#SBATCH --tasks-per-node=4
+#SBATCH -N 4
+#SBATCH -o timescript.out
+
+srun timescript
+echo "fertig" > job_script.out
+
