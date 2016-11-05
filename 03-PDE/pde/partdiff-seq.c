@@ -208,6 +208,7 @@ calculate (struct calculation_arguments* arguments, struct calculation_results *
 	double maxresiduum;                         /* maximum residuum value of a slave in iteration */
 
 	int N = arguments->N;
+        int h = arguments->h;   //direkt als lokale variable, spart ein paar speicherzugriffe pro iteration
 	double*** Matrix = arguments->Matrix;
 
 	/* initialize m1 and m2 depending on algorithm */
@@ -224,22 +225,73 @@ calculate (struct calculation_arguments* arguments, struct calculation_results *
 	{
 		maxresiduum = 0;
 
-		/* over all rows */
+                /*
+                // over all rows
 		for (j = 1; j < N; j++)
 		{
-			/* over all columns */
+			// over all columns
 			for (i = 1; i < N; i++)
 			{
 				star = -Matrix[m2][i-1][j] - Matrix[m2][i][j-1] - Matrix[m2][i][j+1] - Matrix[m2][i+1][j] + 4.0 * Matrix[m2][i][j];
 
-				residuum = getResiduum(arguments, options, i, j, star);
-				korrektur = residuum;
+				//residuum = getResiduum(arguments, options, i, j, star);
+                                if(options->inf_func == FUNC_F0){   
+                                    residuum = (-star) /4.0;
+                                }else{
+                                    residuum = (double) (TWO_PI_SQUARE * sin((double)j * PI * h) * sin((double)i * PI * h) * h*h -star) /4.0;
+                                }
+                                
+				//korrektur = residuum;
+				Matrix[m1][i][j] = Matrix[m2][i][j] + residuum;
+                                
 				residuum = (residuum < 0) ? -residuum : residuum;
 				maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
 
-				Matrix[m1][i][j] = Matrix[m2][i][j] + korrektur;
+				//Matrix[m1][i][j] = Matrix[m2][i][j] + korrektur;
 			}
-		}
+		}*/
+                if(options->inf_func == FUNC_F0){
+                    // over all rows
+                    for (j = 1; j < N; j++)
+                    {
+			// over all columns
+                        for (i = 1; i < N; i++)
+			{
+				star = -Matrix[m2][i-1][j] - Matrix[m2][i][j-1] - Matrix[m2][i][j+1] - Matrix[m2][i+1][j] + 4.0 * Matrix[m2][i][j];
+
+                                //residuum = getResiduum(arguments, options, i, j, star);   
+                                residuum = (-star) /4.0;
+                                
+				//korrektur = residuum;
+				Matrix[m1][i][j] = Matrix[m2][i][j] + residuum;
+                                
+				residuum = (residuum < 0) ? -residuum : residuum;
+				maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+
+				//Matrix[m1][i][j] = Matrix[m2][i][j] + korrektur;
+			}
+                    }
+                }else{
+                    // over all rows
+                    for (j = 1; j < N; j++)
+                    {
+			// over all columns
+			for (i = 1; i < N; i++)
+			{
+				star = -Matrix[m2][i-1][j] - Matrix[m2][i][j-1] - Matrix[m2][i][j+1] - Matrix[m2][i+1][j] + 4.0 * Matrix[m2][i][j];
+
+                                residuum = (double) (TWO_PI_SQUARE * sin((double)j * PI * h) * sin((double)i * PI * h) * h*h -star) /4.0;
+                                
+				//korrektur = residuum;
+				Matrix[m1][i][j] = Matrix[m2][i][j] + residuum;
+                                
+				residuum = (residuum < 0) ? -residuum : residuum;
+				maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+
+				//Matrix[m1][i][j] = Matrix[m2][i][j] + korrektur;
+			}
+                    }
+                }
 
 		results->stat_iteration++;
 		results->stat_precision = maxresiduum;
