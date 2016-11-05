@@ -203,9 +203,7 @@ void calculate(struct calculation_arguments* arguments,
 			for (i = 1; i < N; i++) {
 				// over all rows
 				for (j = 1; j < N; j++) {
-					star = -Matrix2[i - 1][j] - Matrix2[i + 1][j]
-							+ (4.0 * Matrix2[i][j]) - Matrix2[i][j - 1]
-							- Matrix2[i][j + 1];
+					star =(4.0 * Matrix2[i][j]) - Matrix2[i][j - 1] - Matrix2[i][j + 1] - Matrix2[i - 1][j] - Matrix2[i + 1][j];
 
 					if (options->inf_func == FUNC_F0) {
                         residuum = (-star) / 4.0;
@@ -247,9 +245,7 @@ void calculate(struct calculation_arguments* arguments,
 			for (i = 1; i < N; i++) {
 				// over all rows
 				for (j = 1; j < N; j++) {
-					star = -Matrix2[i - 1][j] - Matrix2[i + 1][j]
-							+ (4.0 * Matrix2[i][j]) - Matrix2[i][j - 1]
-							- Matrix2[i][j + 1];
+					star =(4.0 * Matrix2[i][j]) - Matrix2[i][j - 1] - Matrix2[i][j + 1] - Matrix2[i - 1][j] - Matrix2[i + 1][j];
 
 					//residuum = getResiduum(arguments, options, i, j, star);
 					if (options->inf_func == FUNC_F0) {
