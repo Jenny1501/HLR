@@ -1,0 +1,76 @@
+1.1:
+Batch Queuing bedeutet, Batch jobs mithilfe einer Warteschlangenarchitektur zu verwalten, um ihre Ausführung
+(hier auf dem HPC-Cluster) zu steuern.
+
+1.2:
+Ein Batch-Queuing-System hat die Aufgaben, Job-Skripte von Benutzern entgegen zu nehmen und die Jobausführung anzustoßen,
+sobald die für den Job benötigten Ressourcen zur Verfügung stehen. Außerdem müssen Jobs abgebrochen werden können und sollen
+auf Nutzeranfrage beobachtbar sein.
+
+1.3:
+Beispiele (Wikipedia): Moab, Univa Grid Engine, Portable Batch System, Loadleveler (, Condor), SLURM (Simple Linus Utility for
+Resource Management), OpenLava, IBM's Platform LSF
+
+1.4:
+SLURM
+
+1.5:
+Batch nimmt spezifische Skripts entgegen, anhand derer das Batch-Queuing gesteuert wird.
+
+1.6:
+squeue (mit entsprechenden Flags wie -u username)
+
+1.7:
+sview hat eine (bessere) grafische Oberfläche und lässt dem Nutzer mehr Möglichkeiten, die Jobs zu verändern.
+
+1.8:
+scancel <jobid> kann einen Job löschen.
+
+1.9:
+
+1.10:
+scontrol show jobid -dd <jobid>
+
+1.11:
+Backfill wird auf unserem Cluster verwendet.
+
+1.12:
+weidmann@cluster:~$ salloc -p west -w west[7]
+salloc: Granted job allocation 110535
+weidmann@cluster:~$ srun hostname
+west7
+
+1.13:
+Ich verstehe die Frage nicht ganz. Wenn sie auf den SlurmdTimeout anspielt, der ist 300 Sekunden.
+Solche infos sind zu finden mit "scontrol show config" unter Zuhilfenahme von slurm.schedmd.com/slurm.conf.html für
+Erläuterungen.
+
+1.14:
+sprio [-w]
+
+1.15:
+salloc -p ermöglicht das Verwenden einer gewünschten Partition.
+In der linken Spalte unten sind die verschiedenen Partitionen zu sehen.
+
+weidmann@cluster:~$ sinfo
+PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
+abu          up    6:00:00      5   idle abu[1-5]
+amd          up    6:00:00      5   idle amd[1-5]
+magny        up 1-00:00:00      1   idle magny1
+nehalem      up    6:00:00      4  down* nehalem[1-4]
+nehalem      up    6:00:00      1   idle nehalem5
+west         up    6:00:00     10   idle west[1-10]
+
+2.4.1:
+Die Reihenfolge der Ausgaben sollte zufällig sein. Hier ist aber zunächst die Ausgabe von west1 da, danach die anderen 3.
+Dann kommt häufig wieder 3 mal west1 und der Rest ziemlich zufällig.
+Die Timestamps sind nicht sortiert. Also scheint SLURM die Ergebnisse der einzelnen Prozesse mit einem bestimmten Schema einzusammeln.
+Es scheint nicht so zu sein, dass die Ausgabedatei beschrieben wird, wenn ein Prozess fertig ist.
+
+2.4.2:
+Theoretisch sollte es möglich sein, den einzelnen Knoten Zugriff auf die Ausgabedatei zu geben.
+Dann könnte auch das Skript diesen Pfad entgegennehmen und direkt hineinschreiben.
+Das "Erzeugen" der Datei im timescript wäre jedoch recht dämlich, da das Skript ja häufig ausgeführt wird und somit die Ausgabedatei
+überschreiben würde.
+
+Anhand der Beobachtungen aus 2.4.1 gehe ich davon aus, dass SLURM solche Zugriffe nicht zulässt.
