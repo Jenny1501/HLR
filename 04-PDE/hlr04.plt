@@ -1,4 +1,4 @@
-set xlabel "Anzahl Threads, 0 ist sequentielles Programm"
+set xlabel "Anzahl paralleler Threads"
 set ylabel "Programmlaufzeit in Sekunden"
 set title "Laufzeit partdiff_openmp Jacobi mit 512 Interlines"
 
