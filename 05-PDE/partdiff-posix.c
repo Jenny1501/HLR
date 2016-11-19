@@ -63,6 +63,7 @@ struct posstruct
 };
 
 pthread_mutex_t maxres;
+pthread_mutex_t mainready;
 
 /* ************************************************************************ */
 /* Global variables                                                         */
@@ -219,7 +220,7 @@ void *posixcalc(void *arg)
 		/* over all columns */
 		for (j = 1; j < N; j++)
 		{
-			star = 0.25 * (argstruct.matrix_in[i-1][j] + argstruct.matrix_in[i][j-1] + argstruct.matrix_in[i][j+1] + argstruct.matrix_in[i+1][j]);
+			star = 0.25 * (argstruct.matrix_in[i+1][j] + argstruct.matrix_in[i][j-1] + argstruct.matrix_in[i][j+1] + argstruct.matrix_in[i-1][j]);
 
 			if (argstruct.inf_func == FUNC_FPISIN)
 			{
@@ -238,6 +239,9 @@ void *posixcalc(void *arg)
 			argstruct.matrix_out[i][j] = star;
 		}
 	}
+	pthread_mutex_lock(&mainready);
+	pthread_mutex_unlock(&mainready);
+	//Das hier ist eine hässliche Möglichkeit, dass kein Thread fertig wird, bevor ein anderer beginnt.
 	pthread_exit((void*) arg);
 }
 
@@ -252,6 +256,7 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 	int m1, m2;                                 /* used as indices for old and new matrices */
 	                         										/* maximum residuum value of a slave in iteration */
 	pthread_mutex_init(&maxres,NULL);
+	pthread_mutex_init(&mainready,NULL);
 	double const h = arguments->h;
 	int const N = arguments->N;
 
@@ -280,9 +285,6 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 
 	while (term_iteration > 0)
 	{
-		double** Matrix_Out = arguments->Matrix[m1];
-		double** Matrix_In  = arguments->Matrix[m2];
-
 		double *maxresiduum = malloc(sizeof(double));
 		*maxresiduum = 0;
 
@@ -296,12 +298,13 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		int chunk_start = 1;
 		int chunk_end;
 
+		pthread_mutex_lock(&mainready);
 		for(k = 0; k < options->number; k++)
 		{
 			struct posstruct *argstructptr = malloc(sizeof(struct posstruct));
 			struct posstruct argstruct = *argstructptr;
-			argstruct.matrix_in = Matrix_In;
-			argstruct.matrix_out = Matrix_Out;
+			argstruct.matrix_in = arguments->Matrix[m2];
+			argstruct.matrix_out = arguments->Matrix[m1];
 			argstruct.N = arguments->N;
 			argstruct.inf_func = options->inf_func;
 			argstruct.termination = options->termination;
@@ -330,8 +333,8 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 				exit(-1);
 			}
 		}
+		pthread_mutex_unlock(&mainready);
 
-		pthread_attr_destroy(&attr);
 		for(k = 0; k < options->number; k++)
 		{
 			rc = pthread_join(thread[k],&status);
@@ -341,6 +344,8 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 				exit(-1);
 			}
 		}
+		pthread_attr_destroy(&attr);
+
 
 		results->stat_iteration++;
 		results->stat_precision = *maxresiduum;
