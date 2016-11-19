@@ -312,8 +312,8 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 			argstruct.maxresiduum = maxresiduum;
 
 			argstruct.chunk_start = chunk_start;
-
-			int chunksize = N / options->number;
+			printf("N = %d\n", N);
+			int chunksize = N / options->number;				
 			int rest = N - N * chunksize;
 			if (k < rest)
 			{
@@ -322,10 +322,8 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 			chunk_start = chunk_start + chunksize;
 			chunk_end = chunk_start - 1;
 
-
-
 			argstruct.chunk_end = chunk_end;
-			rc = pthread_create(&thread[k], &attr, posixcalc, argstructptr);
+			rc = pthread_create(&thread[k], &attr, posixcalc, &argstruct);
 			if(rc)
 			{
 				printf("ERROR; return code from pthread_create is %d\n", rc);
@@ -333,7 +331,7 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 			}
 		}
 
-		pthread_attr_destroy(&maxres);
+		pthread_attr_destroy(&attr);
 		for(k = 0; k < options->number; k++)
 		{
 			rc = pthread_join(thread[k],&status);
