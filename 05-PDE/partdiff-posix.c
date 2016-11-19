@@ -54,9 +54,9 @@ struct posstruct
 	int chunk_start;
 	int chunk_end;
 	int term_iteration;
-	struct calculation_arguments const* arguments;
-	struct calculation_results* results;
-	struct options const* options;
+	int N;
+	uint64_t inf_func;
+	uint64_t termination;
 	double fpisin;
 	double pih;
 	double* maxresiduum;
@@ -199,7 +199,7 @@ void *posixcalc(void *arg)
 {
 	struct posstruct argstruct = *(struct posstruct *)arg;
 
-	int const N = argstruct.arguments->N;
+	int const N = argstruct.N;
 
 	int i, j;                                   /* local variables for loops */
 	double residuum;                            /* residuum of current iteration */
@@ -212,7 +212,7 @@ void *posixcalc(void *arg)
 	{
 		double fpisin_i = 0.0;
 
-		if (argstruct.options->inf_func == FUNC_FPISIN)
+		if (argstruct.inf_func == FUNC_FPISIN)
 		{
 			fpisin_i = argstruct.fpisin * sin(argstruct.pih * (double)i);
 		}
@@ -222,12 +222,12 @@ void *posixcalc(void *arg)
 		{
 			star = 0.25 * (argstruct.matrix_in[i-1][j] + argstruct.matrix_in[i][j-1] + argstruct.matrix_in[i][j+1] + argstruct.matrix_in[i+1][j]);
 
-			if (argstruct.options->inf_func == FUNC_FPISIN)
+			if (argstruct.inf_func == FUNC_FPISIN)
 			{
 				star += fpisin_i * sin(argstruct.pih * (double)j);
 			}
 
-			if (argstruct.options->termination == TERM_PREC || argstruct.term_iteration == 1)
+			if (argstruct.termination == TERM_PREC || argstruct.term_iteration == 1)
 			{
 				residuum = argstruct.matrix_in[i][j] - star;
 				residuum = (residuum < 0) ? -residuum : residuum;
@@ -284,7 +284,8 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		double** Matrix_Out = arguments->Matrix[m1];
 		double** Matrix_In  = arguments->Matrix[m2];
 
-		double maxresiduum = 0;
+		double *maxresiduum = malloc(sizeof(double));
+		*maxresiduum = 0;
 
 		pthread_t thread[options->number];
 		pthread_attr_t attr;
@@ -302,13 +303,13 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 			struct posstruct argstruct = *argstructptr;
 			argstruct.matrix_in = Matrix_In;
 			argstruct.matrix_out = Matrix_Out;
-			argstruct.arguments = arguments;
-			argstruct.results = results;
-			argstruct.options = options;
+			argstruct.N = arguments->N;
+			argstruct.inf_func = options->inf_func;
+			argstruct.termination = options->termination;
 			argstruct.term_iteration = term_iteration;
 			argstruct.pih = pih;
 			argstruct.fpisin = fpisin;
-			argstruct.maxresiduum = &maxresiduum;
+			argstruct.maxresiduum = maxresiduum;
 
 			argstruct.chunk_start = chunk_start;
 
@@ -343,7 +344,7 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		}
 
 		results->stat_iteration++;
-		results->stat_precision = maxresiduum;
+		results->stat_precision = *maxresiduum;
 
 		/* exchange m1 and m2 */
 		int i = m1;
@@ -353,7 +354,7 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		/* check for stopping calculation depending on termination method */
 		if (options->termination == TERM_PREC)
 		{
-			if (maxresiduum < options->term_precision)
+			if (*maxresiduum < options->term_precision)
 			{
 				term_iteration = 0;
 			}
