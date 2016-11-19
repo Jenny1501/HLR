@@ -313,7 +313,7 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 
 			argstruct.chunk_start = chunk_start;
 
-			int chunksize = N / k;
+			int chunksize = N / options->number;
 			int rest = N - N * chunksize;
 			if (k < rest)
 			{
@@ -322,8 +322,9 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 			chunk_start = chunk_start + chunksize;
 			chunk_end = chunk_start - 1;
 
-			argstruct.chunk_end = chunk_end;
 
+
+			argstruct.chunk_end = chunk_end;
 			rc = pthread_create(&thread[k], &attr, posixcalc, argstructptr);
 			if(rc)
 			{
