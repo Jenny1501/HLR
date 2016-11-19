@@ -216,7 +216,6 @@ void *posixcalc(void *arg)
 		{
 			fpisin_i = argstruct.fpisin * sin(argstruct.pih * (double)i);
 		}
-
 		/* over all columns */
 		for (j = 1; j < N; j++)
 		{
@@ -312,8 +311,7 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 			argstruct.maxresiduum = maxresiduum;
 
 			argstruct.chunk_start = chunk_start;
-			printf("N = %d\n", N);
-			int chunksize = N / options->number;				
+			int chunksize = N / options->number;
 			int rest = N - N * chunksize;
 			if (k < rest)
 			{
@@ -324,6 +322,8 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 
 			argstruct.chunk_end = chunk_end;
 			rc = pthread_create(&thread[k], &attr, posixcalc, &argstruct);
+			//folgendes Problem entsteht. Wenn die einzelnen Threads lesend auf gleiche Matrixfelder zugreifen wollen,
+			//gibt es Speicherzugriffsfehler.
 			if(rc)
 			{
 				printf("ERROR; return code from pthread_create is %d\n", rc);
@@ -363,12 +363,8 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 			term_iteration--;
 		}
 	}
-
 	results->m = m2;
-
 }
-
-
 
 /* ************************************************************************ */
 /*  displayStatistics: displays some statistics about the calculation       */
