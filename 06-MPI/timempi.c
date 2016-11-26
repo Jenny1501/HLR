@@ -32,7 +32,7 @@ int main(int argc, char **argv)
   if (my_id == root_process) {
     for(i = 1; i < amount_procs; i++)
     {
-      MPI_Recv(timestamp, timestamplength, MPI_CHAR, MPI_ANY_SOURCE, return_data_tag, MPI_COMM_WORLD, &status);
+      MPI_Recv(timestamp, timestamplength, MPI_CHAR, i, return_data_tag, MPI_COMM_WORLD, &status);
       printf("%s\n", timestamp);
     }
   }
