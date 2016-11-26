@@ -38,20 +38,20 @@ int main(int argc, char **argv)
   }
   else
   {
-    char* hostname; /* hostname of current process */
+    char hostname[10]; /* hostname of current process */
 
-    struct timeval *tv; /* time struct */
+    struct timeval tv; /* time struct */
     time_t nowtime;
     struct tm *nowtm;
     char tmbuf[64];
 
     /* gets hostname and time */
     gethostname(hostname, 40);
-    gettimeofday(tv,NULL);
-    nowtime = tv->tv_sec;
+    gettimeofday(&tv,NULL);
+    nowtime = tv.tv_sec;
     nowtm = localtime(&nowtime);
     strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
-    snprintf(timestamp, sizeof timestamp, "%s: %s.%06ld", hostname, tmbuf, tv->tv_usec);
+    snprintf(timestamp, sizeof timestamp, "%s: %s.%06ld", hostname, tmbuf, tv.tv_usec);
 
     MPI_Send(timestamp, timestamplength, MPI_CHAR, root_process, return_data_tag, MPI_COMM_WORLD);
   }
