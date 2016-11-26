@@ -18,6 +18,9 @@ int main(int argc, char **argv)
   int i; /* loop iterator */
   int amount_procs; /* total amount of processes */
 
+  long local_milliseconds = 1000000; /* set local_milliseconds so that any valid value is lower for the minimum calculation. */
+  long min_milliseconds;
+
   const int timestamplength = 64;
   char timestamp[64]; /* process individual timestamp */
 
@@ -54,11 +57,21 @@ int main(int argc, char **argv)
     nowtm = localtime(&nowtime);
     strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
     snprintf(timestamp, sizeof timestamp, "%s: %s.%06ld", hostname, tmbuf, tv.tv_usec);
+    local_milliseconds = tv.tv_usec;
 
     MPI_Send(timestamp, timestamplength, MPI_CHAR, root_process, return_data_tag, MPI_COMM_WORLD);
   }
 
   MPI_Barrier(MPI_COMM_WORLD);
+
+  MPI_Reduce(&local_milliseconds, &min_milliseconds, 1, MPI_LONG, MPI_MIN, root_process, MPI_COMM_WORLD);
+  if(my_id == root_process && amount_procs > 1)
+  {
+    printf("%ld\n", min_milliseconds);
+  }
+
+  MPI_Barrier(MPI_COMM_WORLD);
+
   printf("Rang %d beendet jetzt!\n", my_id);
   MPI_Finalize();
 }

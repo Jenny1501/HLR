@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --time=1
-#SBATCH --nodes=1
-#SBATCH --ntasks=5
+#SBATCH --nodes=3
+#SBATCH --ntasks=6
 #SBATCH --partition=west
 #SBATCH --output=job.out
 #SBATCH --error=job.err
@@ -14,4 +14,4 @@ then
     export MPICH_NEMESIS_NETMOD=tcp
 fi
 
-mpiexec ./timempi
+mpiexec ./timempi2
