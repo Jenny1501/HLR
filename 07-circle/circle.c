@@ -35,7 +35,7 @@ main (int argc, char** argv)
   char arg[256];
   int N, my_N, max_N;
   int rank, amount_procs, root_process;
-  int endcondition;
+  int endcondition = 25;
   int* buf, *temp_buf;
   int i;
   int length = 0;
@@ -95,7 +95,7 @@ main (int argc, char** argv)
       printf("\n");
     }
     /* send endcondition to last process */
-    MPI_Send(&endcondition, 1, MPI_INT, amount_procs - 1, defaulttag, MPI_COMM_WORLD);
+    MPI_Send(buf, 1, MPI_INT, amount_procs - 1, defaulttag, MPI_COMM_WORLD);
   }
   /* non root process: sending data to root for print */
   else
@@ -120,12 +120,12 @@ main (int argc, char** argv)
       MPI_Send(buf, my_N, MPI_INT, rank+1, circletag, MPI_COMM_WORLD);
 
       MPI_Recv(&length, 1, MPI_INT, amount_procs-1, circletag, MPI_COMM_WORLD, &status);
-      MPI_Recv(&temp_buf, length, MPI_INT, amount_procs-1, circletag, MPI_COMM_WORLD, &status);
+      MPI_Recv(temp_buf, length, MPI_INT, amount_procs-1, circletag, MPI_COMM_WORLD, &status);
     }
     else if(rank < amount_procs -1)
     {
       MPI_Recv(&length, 1, MPI_INT, rank-1, circletag, MPI_COMM_WORLD, &status);
-      MPI_Recv(&temp_buf, length, MPI_INT, rank-1, circletag, MPI_COMM_WORLD, &status);
+      MPI_Recv(temp_buf, length, MPI_INT, rank-1, circletag, MPI_COMM_WORLD, &status);
 
       MPI_Send(&my_N, 1, MPI_INT, rank+1, circletag, MPI_COMM_WORLD);
       MPI_Send(buf, my_N, MPI_INT, rank+1, circletag, MPI_COMM_WORLD);
@@ -133,7 +133,7 @@ main (int argc, char** argv)
     else
     {
       MPI_Recv(&length, 1, MPI_INT, rank-1, circletag, MPI_COMM_WORLD, &status);
-      MPI_Recv(&temp_buf, length, MPI_INT, rank-1, circletag, MPI_COMM_WORLD, &status);
+      MPI_Recv(temp_buf, length, MPI_INT, rank-1, circletag, MPI_COMM_WORLD, &status);
 
       MPI_Send(&my_N, 1, MPI_INT, root_process, circletag, MPI_COMM_WORLD);
       MPI_Send(buf, my_N, MPI_INT, root_process, circletag, MPI_COMM_WORLD);
@@ -179,6 +179,8 @@ main (int argc, char** argv)
     MPI_Send(&my_N, 1, MPI_INT, root_process, printtag, MPI_COMM_WORLD);
     MPI_Send(buf, my_N, MPI_INT, root_process, printtag, MPI_COMM_WORLD);
   }
+
+  MPI_Barrier(MPI_COMM_WORLD);
 
   MPI_Finalize();
   return EXIT_SUCCESS;
