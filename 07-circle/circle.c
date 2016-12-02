@@ -60,11 +60,12 @@ main (int argc, char** argv)
   N = atoi(arg);
   my_N = N / amount_procs;
   int rest = N % amount_procs;
+  max_N = (rest > 0) ? my_N+1 : my_N;
   if(rank < rest)
   {
     my_N++;
   }
-  max_N = (rest > 0) ? my_N : my_N-1;
+
 
   buf = init(max_N, my_N);
   temp_buf = malloc(sizeof(int) * max_N);
