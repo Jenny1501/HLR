@@ -58,6 +58,7 @@ main (int argc, char** argv)
 
   // Array length
   N = atoi(arg);
+  N = (N < amount_procs) ? amount_procs : N; //take maximum from either N or amount_procs in case N < amount.
   my_N = N / amount_procs;
   int rest = N % amount_procs;
   max_N = (rest > 0) ? my_N+1 : my_N;
