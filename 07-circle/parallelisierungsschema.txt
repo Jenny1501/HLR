@@ -1,0 +1,16 @@
+Datenaufteilung:
+Jeder Prozess hält in seiner lokalen Sub-Matrix die Zeilen, auf welche in einer der Matrizen schreibend zugegriffen wird,
+zusätzlich noch den linken und rechten Rand. Der erste und letzte Subprozess halten zusätzlich noch  den oberen bzw. unteren Rand.
+
+Parallelisierung Jacobi:
+Ein jeder Nicht-Randprozess beginnt, in dem er die letzte Zeile des Vorgängers empfängt und seine eigene dem Nachfolger zukommen lässt.
+Dann werden die Berechnungen durchgeführt und in die Matrix für den nächsten Zeitschritt eingetragen.
+Desweiteren wird jeweils die aktuelle Iteration und Präzesion an den Nachfolger gesendet, nach dem der letzte Prozess fertig ist,
+wird an einer Barrier geprüft ob eines der beiden Abbruchkriterien erreicht wurde und wenn nicht der nächste Zeitschritt gestartet.
+
+Parallelisierung Gauss-Seidel:
+Bevor der erste Zeitschritt berechnet werden kann, muss jeder Nicht-Randprozess seine erste Zeile an seinen Vorgänger schicken.
+Dann kan der erste Durchlauf beginnen: Der Prozess führt seine Berechnungen aus, nach der ersten Zeile kann diese für den nächsten
+Zeitschritt an den Vorgänger geschickt werden. Erst nachdem die restlichen Rechnungen ausgeführt wurden, kann die letzte Zeile an den
+Nachfolger gesendet werden. An dieser Stelle werden auch Iteration und Präzesion an den nächsten Prozess gesendet.
+Ist der letzte Prozess erreicht, werden die Abbruchkriterien geprüft.
