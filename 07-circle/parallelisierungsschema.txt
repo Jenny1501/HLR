@@ -19,7 +19,8 @@ Abbruchproblematik:
 Der Abbruch nach durchlauf aller Iterationen erfolgt seitens der einzelnen Prozesse, die Berechnungen werden eingestellt, es muss jedoch die
 Versorgung des Nachfolgers mit Daten gewähleistet werden, was sich jedoch auf ein einmaliges Senden beschränken sollte, da nach der letzten Iteration
 der Nachfolger auch nur noch eine Iteration übrig hat, bevor er selbst fertig ist.
-Für den Abbruch nach Präzesion würde jeder Prozess das aktuelle max_residuum an seinen Nachfolger senden, ist dieses unter der geforderten Präzesion, werden die Berechnungen eingestellt, der Rest erfolgt wie beim Abbruch nach Iterationsanzahl.
+Für den Abbruch nach Präzesion würde jeder Prozess das aktuelle max_residuum an seinen Nachfolger senden, wenn im untersten Prozess eine hinreichende
+Präzesion festgestellt wird, werden die Berechnungen eingestellt.
 
 Beim Jacobi-Verfahren muss nur am Ende eines Zeitschritts durch den letzten Prozess auf Präzesion oder Anzahl Iterationen geprüft werden, falls
 die Bedingungen nicht erfüllt sind, wird der nächste Zeitschritt gestartet.
