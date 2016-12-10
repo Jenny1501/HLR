@@ -84,21 +84,21 @@ initVariables (struct calculation_arguments* arguments, struct calculation_resul
 	if(rank < rest)
 	{
 		arguments->N_from = N_part * rank 		+ rank + 1;
-		arguments->N_to = N_part * (rank + 1)  	+ rank + 1;
 		N_part++;
+		arguments->N_to = arguments->N_from + N_part -1 ;
 	}
 	else
 	{
 		arguments->N_from = N_part * rank 		+ rest + 1;
-		arguments->N_to = N_part * (rank + 1)	+ rest;
+		arguments->N_to = arguments->N_from + N_part -1 ;
 	}
-	if(rank == 0 || rank == amount_procs-1)
+	if(rank == 0 || rank == size-1)
 	{
-		N_chunk++;
+		N_part++;
 	}
 	else
 	{
-		N_chunk = N_chunk + 2;
+		N_part = N_part + 2;
 	}
 
 	arguments->N_chunk = N_part;
@@ -182,8 +182,6 @@ initMatrices (struct calculation_arguments* arguments, struct options const* opt
 
 	uint64_t const N = arguments->N;
 	uint64_t const N_chunk = arguments->N_chunk;
-	uint64_t const N_from = arguments->N_from;
-	uint64_t const N_to = arguments->N_to;
 	int rank = arguments->rank;
 	int amount_procs = arguments->amount_procs;
 	double const h = arguments->h;
@@ -254,7 +252,7 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 	int amount_procs = arguments->amount_procs;
 
 	int root = 0;
-	int last_proc = amount_proc -1;
+	int last_proc = amount_procs -1;
 
 	int const N = arguments->N;
 	int const N_chunk = arguments->N_chunk;
@@ -327,11 +325,11 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		/* mpi exchanges*/
 		int previous = rank-1;
 		int next = rank +1;
-		if(rank == 0)
+		if(rank == root)
 		{
 			previous = MPI_PROC_NULL;
 		}
-		else if(rank == amount_procs-1)
+		else if(rank == last_proc)
 		{
 			next = MPI_PROC_NULL;
 		}
@@ -344,7 +342,7 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		MPI_Ssend(Matrix_Out[1], N + 1, MPI_DOUBLE, previous, 2, MPI_COMM_WORLD);
 		MPI_Recv(Matrix_Out[N_chunk], N + 1, MPI_DOUBLE, next, 2, MPI_COMM_WORLD, &status);
 
-		MPI_Bcast(&maxresiduum, 1, MPI_Double, amount_procs - 1, MPI_COMM_WORLD);
+		MPI_Bcast(&maxresiduum, 1, MPI_DOUBLE, amount_procs - 1, MPI_COMM_WORLD);
 
 		MPI_Barrier(MPI_COMM_WORLD);
 
@@ -442,8 +440,8 @@ DisplayMatrix (struct calculation_arguments* arguments, struct calculation_resul
 
   int rank = arguments->rank;
   int size = arguments->amount_procs;
-  int from = 1;
-  int to = arguments->N_chunk - 1;
+  int from = arguments->N_from;
+  int to = arguments->N_to;
 
   int x, y;
   double** Matrix = arguments->Matrix[results->m];
@@ -515,21 +513,22 @@ DisplayMatrix (struct calculation_arguments* arguments, struct calculation_resul
 int
 main (int argc, char** argv)
 {
+	
 	MPI_Init(&argc, &argv);
-
 	int rank, size;
 
 	struct options options;
 	struct calculation_arguments arguments;	
-	struct calculation_results results;
+	struct calculation_results results;	
 
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
-	arguments->rank = rank;
-	arguments->amount_procs = size;
-
+	arguments.rank = rank;
+	arguments.amount_procs = size;	
+	
+	
 	AskParams(&options, argc, argv);
-
+	
 	initVariables(&arguments, &results, &options);
 
 	allocateMatrices(&arguments);
@@ -538,8 +537,8 @@ main (int argc, char** argv)
 	gettimeofday(&start_time, NULL);
 	calculate(&arguments, &results, &options);
 	gettimeofday(&comp_time, NULL);
-
-	displayStatistics(&arguments, &results, &options);
+	if(rank == 0)
+	{displayStatistics(&arguments, &results, &options);}
 	DisplayMatrix(&arguments, &results, &options);
 
 	freeMatrices(&arguments);
