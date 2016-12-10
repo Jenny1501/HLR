@@ -2,7 +2,7 @@
 	
 #SBATCH --time=1
 #SBATCH --nodes=2
-#SBATCH --ntasks=12
+#SBATCH --ntasks=4
 #SBATCH --partition=west
 #SBATCH --output=job.out
 #SBATCH --error=job.err

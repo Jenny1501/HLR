@@ -74,7 +74,7 @@ initVariables (struct calculation_arguments* arguments, struct calculation_resul
 	arguments->num_matrices = (options->method == METH_JACOBI) ? 2 : 1;
 	arguments->h = 1.0 / arguments->N;
 
-	int lines = arguments->N+1;
+	int lines = arguments->N-1;
 	int rest = lines % size;
 	int N_part = lines / size;		/* laenge des array ohne rest */
 
