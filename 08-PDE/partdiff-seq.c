@@ -212,9 +212,9 @@ initMatrices (struct calculation_arguments* arguments, struct options const* opt
 			{
 				for (i = 0; i <= N; i++)
 				{
-					Matrix[g][N_chunk][i] = h * i;
+					Matrix[g][N_chunk+1][i] = h * i;
 				}
-				Matrix[g][N_chunk][0] = 0.0;
+				Matrix[g][N_chunk+1][0] = 0.0;
 			}
 		}
 	}
@@ -225,7 +225,7 @@ initMatrices (struct calculation_arguments* arguments, struct options const* opt
 /* ************************************************************************ */
 static
 void
-calculate (struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
+calculate_jacobi (struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
 {
 	MPI_Status status;
 
@@ -279,10 +279,11 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		for (i = 1; i <= N_chunk; i++)
 		{
 			double fpisin_i = 0.0;
+			int newi = arguments->N_from + i - 1;
 
 			if (options->inf_func == FUNC_FPISIN)
 			{
-				fpisin_i = fpisin * sin(pih * (double)i);
+				fpisin_i = fpisin * sin(pih * (double)newi);
 			}
 
 			/* over all columns */
@@ -534,7 +535,7 @@ main (int argc, char** argv)
 	initMatrices(&arguments, &options);
 
 	gettimeofday(&start_time, NULL);
-	calculate(&arguments, &results, &options);
+	calculate_jacobi(&arguments, &results, &options);
 	gettimeofday(&comp_time, NULL);
 	if(rank == 0)
 	{displayStatistics(&arguments, &results, &options);}
