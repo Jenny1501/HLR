@@ -4,23 +4,27 @@ zusätzlich noch den linken und rechten Rand. Der erste und letzte Subprozess ha
 
 Parallelisierung Jacobi:
 Ein jeder Nicht-Randprozess beginnt, in dem er die letzte Zeile des Vorgängers empfängt und seine eigene dem Nachfolger zukommen lässt.
-Dann werden die Berechnungen durchgeführt und in die Matrix für den nächsten Zeitschritt eingetragen.
+Ebenfalls wird die erste Zeile aus der Ergebniss Matrix des Vorgängers benötigt.
+Dann werden die Berechnungen durchgeführt und in die Matrix für den nächsten Zeitschritt eingetragen, wobei nach der ersten Zeile
+die erste Zeile der Ergebnissmatrix an den Vorgänger geschickt wird.
 Desweiteren wird jeweils die aktuelle Iteration und Präzesion an den Nachfolger gesendet, nach dem der letzte Prozess fertig ist,
-wird an einer Barrier geprüft ob eines der beiden Abbruchkriterien erreicht wurde und wenn nicht der nächste Zeitschritt gestartet.
+wird an einer Barrier geprüft ob eines der beiden Abbruchkriterien erreicht wurde und wenn nicht der nächste Zeitschritt gestartet und die Matrizen
+getauscht.
 
 Parallelisierung Gauss-Seidel:
 Bevor der erste Zeitschritt berechnet werden kann, muss jeder Nicht-Randprozess seine erste Zeile an seinen Vorgänger schicken.
 Dann kan der erste Durchlauf beginnen: Der Prozess führt seine Berechnungen aus, nach der ersten Zeile kann diese für den nächsten
 Zeitschritt an den Vorgänger geschickt werden. Erst nachdem die restlichen Rechnungen ausgeführt wurden, kann die letzte Zeile an den
-Nachfolger gesendet werden. An dieser Stelle werden auch Iteration und Präzesion an den nächsten Prozess gesendet.
-Ist der letzte Prozess erreicht, werden die Abbruchkriterien geprüft.
+Nachfolger gesendet werden. An dieser Stelle wird auch max_residuum an den Nachfolger gesendet, erreicht eine ausreichende Präzesion
+den letzten Prozess, oder verbraucht ein Prozess seine Iterationen, wird abgebrochen.
 
 Abbruchproblematik:
 Der Abbruch nach durchlauf aller Iterationen erfolgt seitens der einzelnen Prozesse, die Berechnungen werden eingestellt, es muss jedoch die
 Versorgung des Nachfolgers mit Daten gewähleistet werden, was sich jedoch auf ein einmaliges Senden beschränken sollte, da nach der letzten Iteration
 der Nachfolger auch nur noch eine Iteration übrig hat, bevor er selbst fertig ist.
 Für den Abbruch nach Präzesion würde jeder Prozess das aktuelle max_residuum an seinen Nachfolger senden, wenn im untersten Prozess eine hinreichende
-Präzesion festgestellt wird, werden die Berechnungen eingestellt.
+Präzesion festgestellt wird, werden die Berechnungen eingestellt. Die einzelnen Prozess befinden sich so in gestaffelten Zeitschritten bzw. Iterationen,
+was im Falle eines Abbruchs nach Genauigkeit zu einigen realtiv nutzlosen Berechnungen führt.
 
 Beim Jacobi-Verfahren muss nur am Ende eines Zeitschritts durch den letzten Prozess auf Präzesion oder Anzahl Iterationen geprüft werden, falls
-die Bedingungen nicht erfüllt sind, wird der nächste Zeitschritt gestartet.
+die Bedingungen nicht erfüllt sind, wird der nächste Zeitschritt gestartet, somit befinden sich alle Prozess in der gleichen Iteration.
