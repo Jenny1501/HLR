@@ -78,8 +78,6 @@ initVariables (struct calculation_arguments* arguments, struct calculation_resul
 	int rest = lines % size;
 	int N_part = lines / size;		/* laenge des array ohne rest */
 
-	
-
 	/* weist dem prozess die arraylaenge zu */
 	if(rank < rest)
 	{
@@ -91,14 +89,6 @@ initVariables (struct calculation_arguments* arguments, struct calculation_resul
 	{
 		arguments->N_from = N_part * rank 		+ rest + 1;
 		arguments->N_to = arguments->N_from + N_part -1 ;
-	}
-	if(rank == 0 || rank == size-1)
-	{
-		N_part++;
-	}
-	else
-	{
-		N_part = N_part + 2;
 	}
 
 	arguments->N_chunk = N_part;
@@ -157,7 +147,7 @@ allocateMatrices (struct calculation_arguments* arguments)
 	uint64_t const N = arguments->N;
 	uint64_t const N_chunk = arguments->N_chunk;
 
-	arguments->M = allocateMemory(arguments->num_matrices * (N_chunk + 1) * (N + 1) * sizeof(double));
+	arguments->M = allocateMemory(arguments->num_matrices * (N_chunk + 2) * (N + 1) * sizeof(double));
 	arguments->Matrix = allocateMemory(arguments->num_matrices * sizeof(double**));
 
 	for (i = 0; i < arguments->num_matrices; i++)
@@ -166,7 +156,7 @@ allocateMatrices (struct calculation_arguments* arguments)
 
 		for (j = 0; j <= N; j++)
 		{
-			arguments->Matrix[i][j] = arguments->M + (i * (N_chunk + 1) * (N + 1)) + (j * (N + 1));
+			arguments->Matrix[i][j] = arguments->M + (i * (N_chunk + 2) * (N + 1)) + (j * (N + 1));
 		}
 	}
 }
@@ -190,7 +180,7 @@ initMatrices (struct calculation_arguments* arguments, struct options const* opt
 	/* initialize matrix/matrices with zeros */
 	for (g = 0; g < arguments->num_matrices; g++)
 	{
-		for (i = 0; i <= N_chunk; i++)
+		for (i = 0; i <= N_chunk+1; i++)
 		{
 			for (j = 0; j <= N; j++)
 			{
@@ -203,17 +193,17 @@ initMatrices (struct calculation_arguments* arguments, struct options const* opt
 	if (options->inf_func == FUNC_F0)
 	{
 		for (g = 0; g < arguments->num_matrices; g++)
-		{			
-			for (i = 0; i <= N_chunk; i++)
+		{
+			for (i = 0; i <= N_chunk+1; i++)
 			{
 				Matrix[g][i][0] = 1.0 - (h * i);
 				Matrix[g][i][N] = h * i;
 			}
-	
+
 			if(rank == 0)
-			{	
+			{
 				for (i = 0; i <= N; i++)
-				{			
+				{
 					Matrix[g][0][i] = 1.0 - (h * i);
 				}
 				Matrix[g][0][N] = 0.0;
@@ -224,11 +214,8 @@ initMatrices (struct calculation_arguments* arguments, struct options const* opt
 				{
 					Matrix[g][N_chunk][i] = h * i;
 				}
-				Matrix[g][N_chunk][0] = 0.0;	
+				Matrix[g][N_chunk][0] = 0.0;
 			}
-
-			
-			
 		}
 	}
 }
@@ -286,10 +273,10 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		double** Matrix_Out = arguments->Matrix[m1];
 		double** Matrix_In  = arguments->Matrix[m2];
 
-		maxresiduum = Matrix_In[0][0];
+		maxresiduum = 0.0;
 
 		/* over all rows */
-		for (i = 1; i < N_chunk; i++)
+		for (i = 1; i <= N_chunk; i++)
 		{
 			double fpisin_i = 0.0;
 
@@ -334,13 +321,11 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 			next = MPI_PROC_NULL;
 		}
 
-		Matrix_Out[N_chunk][0] = maxresiduum;
-		
-		MPI_Ssend(Matrix_Out[N_chunk - 1], N + 1, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
+		MPI_Ssend(Matrix_Out[N_chunk], N + 1, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
 		MPI_Recv(Matrix_Out[0], N + 1, MPI_DOUBLE, previous, 1, MPI_COMM_WORLD, &status);
 
 		MPI_Ssend(Matrix_Out[1], N + 1, MPI_DOUBLE, previous, 2, MPI_COMM_WORLD);
-		MPI_Recv(Matrix_Out[N_chunk], N + 1, MPI_DOUBLE, next, 2, MPI_COMM_WORLD, &status);
+		MPI_Recv(Matrix_Out[N_chunk+1], N + 1, MPI_DOUBLE, next, 2, MPI_COMM_WORLD, &status);
 
 		MPI_Bcast(&maxresiduum, 1, MPI_DOUBLE, amount_procs - 1, MPI_COMM_WORLD);
 
@@ -349,9 +334,12 @@ calculate (struct calculation_arguments const* arguments, struct calculation_res
 		/* exchange m1 and m2 */
 		i = m1;
 		m1 = m2;
-		m2 = i;		
+		m2 = i;
 
+		double mymaxresiduum = maxresiduum;
 		/* check for stopping calculation depending on termination method */
+		MPI_Allreduce(&mymaxresiduum, &maxresiduum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+
 		if (options->termination == TERM_PREC)
 		{
 			if (maxresiduum < options->term_precision)
@@ -513,22 +501,33 @@ DisplayMatrix (struct calculation_arguments* arguments, struct calculation_resul
 int
 main (int argc, char** argv)
 {
-	
+
 	MPI_Init(&argc, &argv);
 	int rank, size;
 
 	struct options options;
-	struct calculation_arguments arguments;	
-	struct calculation_results results;	
+	struct calculation_arguments arguments;
+	struct calculation_results results;
 
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	arguments.rank = rank;
-	arguments.amount_procs = size;	
-	
-	
+	arguments.amount_procs = size;
+
+	if(rank == 0)
+	{
+		printf("============================================================\n");
+		printf("Program for calculation of partial differential equations.  \n");
+		printf("============================================================\n");
+		printf("(c) Dr. Thomas Ludwig, TU München.\n");
+		printf("    Thomas A. Zochler, TU München.\n");
+		printf("    Andreas C. Schmidt, TU München.\n");
+		printf("============================================================\n");
+		printf("\n");
+	}
+
 	AskParams(&options, argc, argv);
-	
+
 	initVariables(&arguments, &results, &options);
 
 	allocateMatrices(&arguments);
