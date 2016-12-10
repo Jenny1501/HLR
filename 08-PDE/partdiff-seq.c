@@ -78,7 +78,7 @@ initVariables (struct calculation_arguments* arguments, struct calculation_resul
 	int rest = lines % size;
 	int N_part = lines / size;		/* laenge des array ohne rest */
 
-	/* weist dem prozess die arraylaenge zu */
+	/* split all lines into chunks*/
 	if(rank < rest)
 	{
 		arguments->N_from = N_part * rank 		+ rank + 1;
@@ -147,6 +147,7 @@ allocateMatrices (struct calculation_arguments* arguments)
 	uint64_t const N = arguments->N;
 	uint64_t const N_chunk = arguments->N_chunk;
 
+	//now has to allocate chunk+2 lines for each rank to save the first line of the next rank and the last line of the previous one.
 	arguments->M = allocateMemory(arguments->num_matrices * (N_chunk + 2) * (N + 1) * sizeof(double));
 	arguments->Matrix = allocateMemory(arguments->num_matrices * sizeof(double**));
 
@@ -196,8 +197,10 @@ initMatrices (struct calculation_arguments* arguments, struct options const* opt
 		{
 			for (i = 0; i <= N_chunk+1; i++)
 			{
-				Matrix[g][i][0] = 1.0 - (h * i);
-				Matrix[g][i][N] = h * i;
+				//recalculate newi instead of i because matrix has been splitted.
+				int newi = arguments->N_from + i - 1;
+				Matrix[g][i][0] = 1.0 - (h * newi);
+				Matrix[g][i][N] = h * newi;
 			}
 
 			if(rank == 0)
@@ -268,6 +271,18 @@ calculate_jacobi (struct calculation_arguments const* arguments, struct calculat
 		fpisin = 0.25 * TWO_PI_SQUARE * h * h;
 	}
 
+	/* mpi exchange preparation. Get each pre- and post-node. MPI_PROC_NULL for first and last rank.*/
+	int previous = rank-1;
+	int next = rank +1;
+	if(rank == root)
+	{
+		previous = MPI_PROC_NULL;
+	}
+	if(rank == last_proc)
+	{
+		next = MPI_PROC_NULL;
+	}
+
 	while (term_iteration > 0)
 	{
 		double** Matrix_Out = arguments->Matrix[m1];
@@ -279,6 +294,7 @@ calculate_jacobi (struct calculation_arguments const* arguments, struct calculat
 		for (i = 1; i <= N_chunk; i++)
 		{
 			double fpisin_i = 0.0;
+			//must recalculate i for the fpisin because the Matrix ist now splitted
 			int newi = arguments->N_from + i - 1;
 
 			if (options->inf_func == FUNC_FPISIN)
@@ -310,27 +326,12 @@ calculate_jacobi (struct calculation_arguments const* arguments, struct calculat
 		results->stat_iteration++;
 		results->stat_precision = maxresiduum;
 
-		/* mpi exchanges*/
-		int previous = rank-1;
-		int next = rank +1;
-		if(rank == root)
-		{
-			previous = MPI_PROC_NULL;
-		}
-		else if(rank == last_proc)
-		{
-			next = MPI_PROC_NULL;
-		}
-
+		//sending around the data to each next and previous process
 		MPI_Ssend(Matrix_Out[N_chunk], N + 1, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
 		MPI_Recv(Matrix_Out[0], N + 1, MPI_DOUBLE, previous, 1, MPI_COMM_WORLD, &status);
 
 		MPI_Ssend(Matrix_Out[1], N + 1, MPI_DOUBLE, previous, 2, MPI_COMM_WORLD);
 		MPI_Recv(Matrix_Out[N_chunk+1], N + 1, MPI_DOUBLE, next, 2, MPI_COMM_WORLD, &status);
-
-		MPI_Bcast(&maxresiduum, 1, MPI_DOUBLE, amount_procs - 1, MPI_COMM_WORLD);
-
-		MPI_Barrier(MPI_COMM_WORLD);
 
 		/* exchange m1 and m2 */
 		i = m1;
@@ -339,7 +340,9 @@ calculate_jacobi (struct calculation_arguments const* arguments, struct calculat
 
 		double mymaxresiduum = maxresiduum;
 		/* check for stopping calculation depending on termination method */
+		// first get the global maximum of maxresiduum to achieve this.
 		MPI_Allreduce(&mymaxresiduum, &maxresiduum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+		MPI_Barrier(MPI_COMM_WORLD);
 
 		if (options->termination == TERM_PREC)
 		{
@@ -510,11 +513,13 @@ main (int argc, char** argv)
 	struct calculation_arguments arguments;
 	struct calculation_results results;
 
+	//set mpi variables, put them into arguments for easier usage.
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	arguments.rank = rank;
 	arguments.amount_procs = size;
 
+	//pulled this out of askparams for easier control to only print once
 	if(rank == 0)
 	{
 		printf("============================================================\n");
