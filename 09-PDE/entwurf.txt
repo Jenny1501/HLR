@@ -1,0 +1,62 @@
+calculate_gauss(arguments)
+{
+	//declare variables
+	int x y z...
+	
+	//mpi initialisation	
+	get_previous_process()
+	get_following_process()
+		
+	//other initialisations
+	matrix = m0
+	...
+	
+	//calculation loop
+	while(iteration)
+	{
+		MPI_Recv(Firstline, previous_process)
+		
+		if not first iteration:
+			MPI_Recv(Lastline, following_process)
+			
+		maxresiduum = Firstline[0] // hidden maxresiduum to save MPI communication overhead	
+		finishflag_up = Lastline[0] // hidden end-condition which can only set by the last process and will be handed up to the first process
+		finishflag_down = Firstline[N] // hidden end-condition which can only set by first process when "finishflag_up" arrives it. Sends the signal that there is not further calculation to do
+		
+		//first process checks if precision termination is arrived
+		if first process
+			finishflag_down = finishflag_up
+		
+		if not finishflag_down
+			//common calculation of the processes matrix part.
+			star = ...
+			Matrix = ...
+			...
+		
+			//calculate new maxresiduum
+			residuum = ...
+			maxresiduum = ...
+			
+		//save corner information
+		reset1 = SecondLastLine[0]
+		reset2 = SecondLastLine[N]
+		reset3 = SecondLine[0]
+		
+		//hide information in corners.
+		SecondLastLine[0] = maxresiduum
+		SecondLastLine[N] = finishflag_down
+		SecondLine[0] = finishflag_up
+		
+		/send 
+		MPI_Ssend(SecondLastLine, following_process)
+		MPI_Ssend(SecondLine, previous_process)
+		
+		
+		//reset borders
+		SecondLastLine[0] = reset1
+		SecondLastLine[N] = reset2
+		SecondLine[0] = reset3
+		
+		iteration--
+	}	
+}
