@@ -1,3 +1,12 @@
+//The idea is to implement a pipeline which is handing 3 different types of control information in two directions:
+//upwards := previous process
+//downwoards := following process
+
+//Types of control information
+//1. The maxresiduum is handed to the following processes so that the last process can decide when to terminate by precision
+//2. The decision to terminate by precision is being handed "upwards" to the previous command.
+//3. The actual iteration which is last calculated will be handed "downwards" so that every process ends at the same iteration.
+
 calculate_gauss(arguments)
 {
 	//declare variables
