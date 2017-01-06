@@ -371,6 +371,12 @@ calculate_gauss (struct calculation_arguments const* arguments, struct calculati
 	double residuum;                            /* residuum of current iteration */
 	double maxresiduum;                         /* maximum residuum value of a slave in iteration */
 
+	int eins = 1;
+
+	double finishflag;
+	double rootfinish = 0.0;
+	double save1, save2;
+
 	int rank = arguments->rank;
 	int amount_procs = arguments->amount_procs;
 
@@ -406,51 +412,101 @@ calculate_gauss (struct calculation_arguments const* arguments, struct calculati
 
 	double** Matrix = arguments->Matrix[0];
 
+	MPI_Request mpireq;
+
+	if(rank == root)
+	{
+		MPI_Irecv(&rootfinish, 1, MPI_DOUBLE, last_proc, 3, MPI_COMM_WORLD, mpireq);
+	}
+
 	while (term_iteration > 0)
 	{
-		maxresiduum = 0.0;
+		//sending around the data to each next and previous process
+		MPI_Recv(Matrix[0], N + 1, MPI_DOUBLE, previous, 1, MPI_COMM_WORLD, &status);
 
-		/* over all rows */
-		for (i = 1; i <= N_chunk; i++)
+		int firstiteration = (term_iteration == options->term_iteration);
+
+		if(!firstiteration)
 		{
-			double fpisin_i = 0.0;
-			//must recalculate i for the fpisin because the Matrix ist now splitted
-			int newi = arguments->N_from + i - 1;
+			MPI_Recv(Matrix[N_chunk+1], N + 1, MPI_DOUBLE, next, 2, MPI_COMM_WORLD, &status);
+			maxresiduum = Matrix[0][0];
+			finishflag = Matrix[0][N];
+		}
+		else
+		{
+			maxresiduum = 0.0;
+			finishflag = 0.0;
+		}
 
-			if (options->inf_func == FUNC_FPISIN)
-			{
-				fpisin_i = fpisin * sin(pih * (double)newi);
-			}
+		if (rank == root)
+		{
+			finishflag = rootfinish;
+		}
 
-			/* over all columns */
-			for (j = 1; j < N; j++)
+		if (finishflag < 1)
+		{
+		/* over all rows */
+			for (i = 1; i <= N_chunk; i++)
 			{
-				star = 0.25 * (Matrix[i-1][j] + Matrix[i][j-1] + Matrix[i][j+1] + Matrix[i+1][j]);
+				double fpisin_i = 0.0;
+				//must recalculate i for the fpisin because the Matrix ist now splitted
+				int newi = arguments->N_from + i - 1;
 
 				if (options->inf_func == FUNC_FPISIN)
 				{
-					star += fpisin_i * sin(pih * (double)j);
+					fpisin_i = fpisin * sin(pih * (double)newi);
 				}
 
-				if (options->termination == TERM_PREC || term_iteration == 1)
+				/* over all columns */
+				for (j = 1; j < N; j++)
 				{
-					residuum = Matrix[i][j] - star;
-					residuum = (residuum < 0) ? -residuum : residuum;
-					maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
-				}
+					star = 0.25 * (Matrix[i-1][j] + Matrix[i][j-1] + Matrix[i][j+1] + Matrix[i+1][j]);
 
-				Matrix[i][j] = star;
+					if (options->inf_func == FUNC_FPISIN)
+					{
+						star += fpisin_i * sin(pih * (double)j);
+					}
+
+					if (options->termination == TERM_PREC || term_iteration == 1)
+					{
+						residuum = Matrix[i][j] - star;
+						residuum = (residuum < 0) ? -residuum : residuum;
+						maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+					}
+
+					Matrix[i][j] = star;
+				}
+			}
+		}
+		else
+		{
+			if (options->termination == TERM_PREC)
+			{
+				term_iteration = 0;
 			}
 		}
 
 		results->stat_iteration++;
 		results->stat_precision = maxresiduum;
 
+		//save corner data
+		save1 = Matrix[N_chunk][0];
+		save2 = Matrix[N_chunk][N];
+
+		Matrix[N_chunk][0] = maxresiduum;
+		Matrix[N_chunk][N] = finishflag;
+
+		MPI_Ssend(Matrix[N_chunk], N + 1, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
+		MPI_Ssend(Matrix[1], N + 1, MPI_DOUBLE, previous, 2, MPI_COMM_WORLD);
+
+		Matrix[N_chunk][0] = save1;
+		Matrix[N_chunk][N] = save2;
+
 		if (options->termination == TERM_PREC)
 		{
 			if (maxresiduum < options->term_precision)
 			{
-				term_iteration = 0;
+				MPI_Isend(&eins, 1, MPI_DOUBLE, root, 3, MPI_COMM_WORLD, &mpireq);
 			}
 		}
 		else if (options->termination == TERM_ITER)
@@ -459,7 +515,7 @@ calculate_gauss (struct calculation_arguments const* arguments, struct calculati
 		}
 	}
 
-	results->m = m2;
+	results->m = 0;
 }
 
 /* ************************************************************************ */
