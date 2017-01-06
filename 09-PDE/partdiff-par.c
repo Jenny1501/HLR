@@ -443,7 +443,7 @@ calculate_gauss (struct calculation_arguments const* arguments, struct calculati
 			finishflag = rootfinish;
 		}
 
-		if (finishflag < 1)
+		if (finishflag < 1.0)
 		{
 		/* over all rows */
 			for (i = 1; i <= N_chunk; i++)
@@ -497,7 +497,8 @@ calculate_gauss (struct calculation_arguments const* arguments, struct calculati
 		Matrix[N_chunk][N] = finishflag;
 
 		MPI_Ssend(Matrix[N_chunk], N + 1, MPI_DOUBLE, next, 1, MPI_COMM_WORLD);
-		MPI_Ssend(Matrix[1], N + 1, MPI_DOUBLE, previous, 2, MPI_COMM_WORLD);
+		if (finishflag < 1.0 && term_iteration > 1)
+		{MPI_Ssend(Matrix[1], N + 1, MPI_DOUBLE, previous, 2, MPI_COMM_WORLD);}
 
 		Matrix[N_chunk][0] = save1;
 		Matrix[N_chunk][N] = save2;
@@ -516,6 +517,7 @@ calculate_gauss (struct calculation_arguments const* arguments, struct calculati
 	}
 
 	results->m = 0;
+	MPI_Barrier(MPI_COMM_WORLD);
 }
 
 /* ************************************************************************ */
