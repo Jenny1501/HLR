@@ -28,7 +28,7 @@
 #include <sys/time.h>
 #include <mpi.h>
 
-#include "partdiff-seq.h"
+#include "partdiff-par.h"
 
 struct calculation_arguments
 {
@@ -416,7 +416,7 @@ calculate_gauss (struct calculation_arguments const* arguments, struct calculati
 
 	if(rank == root)
 	{
-		MPI_Irecv(&rootfinish, 1, MPI_DOUBLE, last_proc, 3, MPI_COMM_WORLD, mpireq);
+		MPI_Irecv(&rootfinish, 1, MPI_DOUBLE, last_proc, 3, MPI_COMM_WORLD, &mpireq);
 	}
 
 	while (term_iteration > 0)
@@ -424,7 +424,7 @@ calculate_gauss (struct calculation_arguments const* arguments, struct calculati
 		//sending around the data to each next and previous process
 		MPI_Recv(Matrix[0], N + 1, MPI_DOUBLE, previous, 1, MPI_COMM_WORLD, &status);
 
-		int firstiteration = (term_iteration == options->term_iteration);
+		int firstiteration = (term_iteration == (int)options->term_iteration);
 
 		if(!firstiteration)
 		{
@@ -698,7 +698,15 @@ main (int argc, char** argv)
 	initMatrices(&arguments, &options);
 
 	gettimeofday(&start_time, NULL);
-	calculate_jacobi(&arguments, &results, &options);
+	if (options.method == METH_GAUSS_SEIDEL)
+	{
+		calculate_gauss(&arguments, &results, &options);
+	}
+	else if (options.method == METH_JACOBI)
+	{
+		calculate_jacobi(&arguments, &results, &options);
+	}
+
 	gettimeofday(&comp_time, NULL);
 	if(rank == 0)
 	{displayStatistics(&arguments, &results, &options);}
