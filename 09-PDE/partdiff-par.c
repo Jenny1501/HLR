@@ -360,6 +360,108 @@ calculate_jacobi (struct calculation_arguments const* arguments, struct calculat
 	results->m = m2;
 }
 
+static
+void
+calculate_gauss (struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
+{
+	MPI_Status status;
+
+	int i, j;                                   /* local variables for loops */
+	double star;                                /* four times center value minus 4 neigh.b values */
+	double residuum;                            /* residuum of current iteration */
+	double maxresiduum;                         /* maximum residuum value of a slave in iteration */
+
+	int rank = arguments->rank;
+	int amount_procs = arguments->amount_procs;
+
+	int root = 0;
+	int last_proc = amount_procs -1;
+
+	int const N = arguments->N;
+	int const N_chunk = arguments->N_chunk;
+	double const h = arguments->h;
+
+	double pih = 0.0;
+	double fpisin = 0.0;
+
+	int term_iteration = options->term_iteration;
+
+	if (options->inf_func == FUNC_FPISIN)
+	{
+		pih = PI * h;
+		fpisin = 0.25 * TWO_PI_SQUARE * h * h;
+	}
+
+	/* mpi exchange preparation. Get each pre- and post-node. MPI_PROC_NULL for first and last rank.*/
+	int previous = rank-1;
+	int next = rank +1;
+	if(rank == root)
+	{
+		previous = MPI_PROC_NULL;
+	}
+	if(rank == last_proc)
+	{
+		next = MPI_PROC_NULL;
+	}
+
+	double** Matrix = arguments->Matrix[0];
+
+	while (term_iteration > 0)
+	{
+		maxresiduum = 0.0;
+
+		/* over all rows */
+		for (i = 1; i <= N_chunk; i++)
+		{
+			double fpisin_i = 0.0;
+			//must recalculate i for the fpisin because the Matrix ist now splitted
+			int newi = arguments->N_from + i - 1;
+
+			if (options->inf_func == FUNC_FPISIN)
+			{
+				fpisin_i = fpisin * sin(pih * (double)newi);
+			}
+
+			/* over all columns */
+			for (j = 1; j < N; j++)
+			{
+				star = 0.25 * (Matrix[i-1][j] + Matrix[i][j-1] + Matrix[i][j+1] + Matrix[i+1][j]);
+
+				if (options->inf_func == FUNC_FPISIN)
+				{
+					star += fpisin_i * sin(pih * (double)j);
+				}
+
+				if (options->termination == TERM_PREC || term_iteration == 1)
+				{
+					residuum = Matrix[i][j] - star;
+					residuum = (residuum < 0) ? -residuum : residuum;
+					maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+				}
+
+				Matrix[i][j] = star;
+			}
+		}
+
+		results->stat_iteration++;
+		results->stat_precision = maxresiduum;
+
+		if (options->termination == TERM_PREC)
+		{
+			if (maxresiduum < options->term_precision)
+			{
+				term_iteration = 0;
+			}
+		}
+		else if (options->termination == TERM_ITER)
+		{
+			term_iteration--;
+		}
+	}
+
+	results->m = m2;
+}
+
 /* ************************************************************************ */
 /*  displayStatistics: displays some statistics about the calculation       */
 /* ************************************************************************ */
