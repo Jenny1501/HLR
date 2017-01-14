@@ -1,0 +1,9 @@
+unset log
+unset label
+set xtic auto
+set ytic auto
+set title "Communication"
+set xlabel "Zeit [s]"
+set ylabel "Anzahl Knoten"
+
+plot "COMMUNICATION_A_GS.dat" using 2:4 title 'Jacobi' with linespoints
