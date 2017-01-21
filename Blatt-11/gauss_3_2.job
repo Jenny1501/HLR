@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#SBATCH --time=01:00:00
+#SBATCH --partition=west
+#SBATCH --nodes=2 --ntasks=3
+#SBATCH --error=gauss_3_2.err --output=gauss_3_2.out
+
+. /etc/profile.d/wr-spack.sh
+spack load --dependencies mpi
+
+export MPICH_NEMESIS_NETMOD=tcp
+
+mpiexec ./partdiff-par 1 1 0 2 2 20
